@@ -1,0 +1,159 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.3/cropper.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.3/cropper.js"></script>
+<style>
+	.preview {
+	overflow: hidden;
+	width: 200px;
+	height: 200px;
+	}
+	img {
+	  max-width: 100%; /* This rule is very important, please do not ignore this! */
+	}
+	.button {
+  background-color: #51C134;
+  color: white;
+  padding: 0.4em 0.8em;
+	border-radius: 2px;
+  text-decoration: none;
+  text-transform: uppercase;
+	cursor: pointer;
+	border: 1px solid #51C134;
+	min-width: 150px;
+	text-align: center;
+	display: inline-block;
+}
+.button:hover {
+	border: 1px solid #080;
+	background-color: #71D154;
+}
+
+</style>
+<script>
+
+var bannerWidth = 1137;
+var bannerHeight = 640;
+
+	get_overlay_path = function(color){
+		// const BASE_PATH = '/sites/esn-dresden.de/files/imce/'
+		switch(color) {
+		  case 'Green':
+		    return 'https://i.ibb.co/VHSR1Th/overlay-green.png';
+		    break;
+		  case 'Dark Blue':
+				return 'https://i.ibb.co/svh1f2Q/overlay-dark-blue.png';
+		    break;
+			case 'Light Blue':
+		    return 'https://i.ibb.co/99VxnJR/overlay-light-blue.png';
+		    break;
+			case 'Orange':
+				return 'https://i.ibb.co/myJT0zq/overlay-orange.png'
+		    break;
+			case 'Pink':
+				return 'https://i.ibb.co/0CGt1wT/overlay-pink.png'
+		    break;
+			default:
+		    return 'https://i.ibb.co/svh1f2Q/overlay-dark-blue.png';
+		}
+	}
+
+	var update_preview = function(mycropper){
+
+		var image = document.getElementById('upload-img');
+
+		if (image.src){
+			var destCanvas = $('#output').get(0);
+			var cropped = mycropper.getCroppedCanvas();
+			var ctx = destCanvas.getContext('2d');
+			var res = ctx.drawImage(cropped, 0,0, bannerWidth, bannerHeight);
+			var overlay = new Image();
+			var logo = new Image();
+			overlay.onload = function() {
+				// add image
+				ctx.drawImage(overlay, 0, 0);
+
+				// add text
+				ctx.font = "bold 75px Lato";
+				offset = 50;
+				var title0 = $('#title_field').val() != undefined ? $('#title_field').val() : '';
+				var title1 = $('#title_field1').val() != undefined ? $('#title_field1').val() : '';
+				var title2 = $('#title_field2').val() != undefined ? $('#title_field2').val() : '';
+				if ((title0.length > 8) || (title1.length > 8) || (title2.length > 8)){
+					ctx.font = "bold 60px Lato";
+					offset = 35;
+				}
+				ctx.textAlign = "end";
+				ctx.fillStyle = "#fff";
+				ctx.fillText(title0, 1100, 120);
+				ctx.fillText(title1, 1100, 120+offset);
+				ctx.fillText(title2, 1100, 120+2*offset);
+				logo.src = 	'img/logo.png'
+			};
+			logo.onload = function(){
+				ctx.drawImage(logo, 0, 0);
+			}
+		overlay.src = get_overlay_path($('#color_select').children('option:selected').val());
+		}
+	};
+
+	$(function(){
+		download_img = function(el) {
+			var canvas = document.getElementById("canvas_output");
+			canvas.toBlob(function(blob) {
+  	  			saveAs(blob, "pretty image.png");
+			});
+		};
+		$("#file").change(function(event){
+			var image = document.getElementById('upload-img');
+			image.src = URL.createObjectURL(event.target.files[0]);
+			cropper = new Cropper(image, {
+				aspectRatio: bannerWidth / bannerHeight,
+				zoomable: false,
+				scalable: true,
+				crop(event) {
+				},
+			});
+			$('#get-crop').click(function(){
+				update_preview(cropper);
+			})
+
+		});
+		$('#color_select').on('change', function(event){
+		});
+
+	});
+</script>
+</head>
+<body>
+	<!-- cursor: pointer; border: solid #666 1px; padding: 2px; -->
+<p><input type="file"  accept="image/*" name="image" id="file" style="display: none;"></p>
+<p><label for="file" class="button">Open Image</label></p>
+<p><label>Title: </label><input type="text" id="title_field"/></p>
+<p><label>Title 2: </label><input type="text" id="title_field2"/></p>
+<p><label>Title 3: </label><input type="text" id="title_field3"/></p>
+<label>Color:</label>
+<select name="top5" size="5" id="color_select">
+	<option>Green</option>
+	<option>Dark Blue</option>
+	<option>Light Blue</option>
+	<option>Orange</option>
+	<option>Pink</option>
+</select>
+<p><label class="button"  id="get-crop">Create Image</a></p>
+
+<hr>
+<p>Original Image:</p>
+<p><div style="max-width: 379px; max-height: 213px; overflow: hidden"><img id="upload-img" /></div></p>
+<!-- <div class="col col-3">
+  <div class="preview"></div>
+</div> -->
+<p>Image Result:</p>
+<canvas id="output" width="1137", height="640" style="width: 379px; height: 213px"></canvas>
+
+<script>
+</script>
+</body>
+
+</html>
