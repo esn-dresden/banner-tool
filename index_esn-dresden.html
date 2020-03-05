@@ -1,6 +1,7 @@
 <html>
 <head>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.3/cropper.css">
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700&display=swap" rel="stylesheet">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.3/cropper.js"></script>
 <style>
@@ -36,6 +37,11 @@
 var bannerWidth = 1137;
 var bannerHeight = 640;
 
+const LOGOS = {
+	'Old Logo': 'https://raw.githubusercontent.com/esn-dresden/banner-tool/master/img/logo.png',
+	'New Logo': 'https://raw.githubusercontent.com/esn-dresden/banner-tool/master/img/DE-tu_dresden-logo-white.png'
+}
+
 	get_overlay_path = function(color){
 		// const BASE_PATH = '/sites/esn-dresden.de/files/imce/'
 		switch(color) {
@@ -59,6 +65,10 @@ var bannerHeight = 640;
 		}
 	}
 
+	get_logo_path = function(logo_name){
+		return LOGOS[logo_name];
+	}
+
 	var update_preview = function(mycropper){
 
 		var image = document.getElementById('upload-img');
@@ -72,27 +82,31 @@ var bannerHeight = 640;
 			var logo = new Image();
 			overlay.onload = function() {
 				// add image
-				ctx.drawImage(overlay, 0, 0);
+				ctx.drawImage(overlay, 0, 0, bannerWidth+2, bannerHeight+2);
 
 				// add text
 				ctx.font = "bold 75px Lato";
-				offset = 50;
+				offset = 85;
 				var title0 = $('#title_field').val() != undefined ? $('#title_field').val() : '';
 				var title1 = $('#title_field1').val() != undefined ? $('#title_field1').val() : '';
 				var title2 = $('#title_field2').val() != undefined ? $('#title_field2').val() : '';
 				if ((title0.length > 8) || (title1.length > 8) || (title2.length > 8)){
 					ctx.font = "bold 60px Lato";
-					offset = 35;
+					offset = 70;
 				}
 				ctx.textAlign = "end";
 				ctx.fillStyle = "#fff";
 				ctx.fillText(title0, 1100, 120);
 				ctx.fillText(title1, 1100, 120+offset);
 				ctx.fillText(title2, 1100, 120+2*offset);
-				logo.src = 	'img/logo.png'
+				logo.src = get_logo_path($('#logo_select').children('option:selected').val());
+				// logo.src = 'https://raw.githubusercontent.com/esn-dresden/banner-tool/master/img/logo.png'
+
 			};
 			logo.onload = function(){
-				ctx.drawImage(logo, 0, 0);
+				ratio = logo.height / logo.width
+				console.log(ratio);
+				ctx.drawImage(logo, 865,460, 250, 250*ratio);
 			}
 		overlay.src = get_overlay_path($('#color_select').children('option:selected').val());
 		}
@@ -131,15 +145,24 @@ var bannerHeight = 640;
 <p><input type="file"  accept="image/*" name="image" id="file" style="display: none;"></p>
 <p><label for="file" class="button">Open Image</label></p>
 <p><label>Title: </label><input type="text" id="title_field"/></p>
-<p><label>Title 2: </label><input type="text" id="title_field2"/></p>
-<p><label>Title 3: </label><input type="text" id="title_field3"/></p>
+<p><label>Title 2: </label><input type="text" id="title_field1"/></p>
+<p><label>Title 3: </label><input type="text" id="title_field2"/></p>
 <label>Color:</label>
+<br/>
 <select name="top5" size="5" id="color_select">
 	<option>Green</option>
 	<option>Dark Blue</option>
 	<option>Light Blue</option>
 	<option>Orange</option>
 	<option>Pink</option>
+</select>
+<br/>
+<br/>
+<label>Logo:</label>
+<br/>
+<select name="logos" size="2" id="logo_select">
+	<option selected="selected">New Logo</option>
+	<option>Old Logo</option>
 </select>
 <p><label class="button"  id="get-crop">Create Image</a></p>
 
@@ -149,7 +172,7 @@ var bannerHeight = 640;
 <!-- <div class="col col-3">
   <div class="preview"></div>
 </div> -->
-<p>Image Result:</p>
+<p>Image Preview:</p>
 <canvas id="output" width="1137", height="640" style="width: 379px; height: 213px"></canvas>
 
 <script>
